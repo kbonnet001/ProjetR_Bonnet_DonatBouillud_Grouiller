@@ -1,0 +1,47 @@
+#Projet R : mise en place de l'ACP
+
+happy <- WHR20_DataForFigure2.1;
+
+##On récupère les colonnes quantitatives
+happyACP <- happy[,-c(1,2,4,5,6,13,14,15,16,17,18,19,20,21)];
+row.names(happyACP) <- happy$Country_name;
+
+
+#Mise en place de l'ACP
+res<-PCAmix(happyACP)
+res<-PCAmix(happyACP, graph=FALSE)
+res
+
+
+#Choix du nombre d'axes à retenir
+round(res$eig,digit=2)
+barplot(res$eig[,1],main="Eigenvalues", names.arg=1:nrow(res$eig))
+abline(h=1,col=2,lwd=2)
+##On garde les deux premiers axes
+
+#graphique des individus et des variables sur le plan factoriel 1-2
+?plot.PCAmix
+plot(res,axes=c(1,2),choice="ind")
+plot(res,axes=c(1,2),choice="cor")
+plot(res,axes=c(1,2),choice="sqload")
+
+#sorties numériques pour les individus et variables
+res$ind
+round(res$ind$cos2,digit=3)
+res$quanti
+round(res$quanti$cos2,digit=3)
+
+res.pca <- PCA(happyACP, graph = FALSE)
+
+
+##Il faut télécharger factoextra et factoMineR
+
+fviz_pca_ind(res.pca,
+             geom.ind = "text", # Montre les points seulement (mais pas le "text")
+             col.ind = happy$Regional_indicator, # colorer by groups
+             palette = c("#00AFBB", "#E7B800", "#FC4E07","#967171","#2D7341", "#3C4C93","#A9D74D","#ED7D7D", "#291313","#F126B0"),
+             addEllipses = FALSE, # Ellipses de concentration
+             legend.title = "Regions"
+)
+
+
