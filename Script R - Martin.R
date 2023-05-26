@@ -1,29 +1,32 @@
 
-## Chargement des donnÃ©es ##
+  ## Chargement des donnÃ©es ##
+## Avec la 1ere colonne en tant qu'observation ##
 happy <- read.table("C:/Users/marti/Desktop/Projet BD/world_happiness_2020.txt",row.names = 1,   header = T, sep = "\t")
-## Visualisation jeu de donnÃ©es ##
+
 
 happy2 <- read.table("C:/Users/marti/Desktop/Projet BD/world_happiness_2020.txt",   header = T, sep = "\t")
 
-
-
+  ## Visualisation jeu de donnÃ©es ##
+## Apercus des trois premieres lignes du jeu de données  ##
 head(happy,3)
 
 ## Structure du jeu de donnÃ©es ##
-## b <- happy[,-1] ##
+## b <- happy[,-1] Rappel : permet de retirer des éléments 
 str(happy)
 
 ## Renomage colonnes ##
 names(happy)
+names(happy2)
 colnames(happy) <- c("Region", "Happiness score", "Log (GDP Per Capital)", "Social support", "Healthy life expectancy", "Freedom to make life choices", "Generosity", "Perceptions of corruption")
+colnames(happy2) <- c("Country","Region", "Happiness score", "Log (GDP Per Capital)", "Social support", "Healthy life expectancy", "Freedom to make life choices", "Generosity", "Perceptions of corruption")
 attach(happy)
 Region
 
-## ##
+## Si necessaire transofrmer deux varibles de chaines de caracteres en facteurs  ##
 happy$Region <- as.factor(happy$Region)
 happy$Country <- as.factor(happy$Country)
 
-## ##
+## Pré-analyse des données : variables qualitatives ##
 NbPaysParRegion <- table(Region)
 NbPaysParRegion <- as.data.frame(NbPaysParRegion)
 names(NbPaysParRegion)
@@ -31,10 +34,6 @@ colnames(NbPaysParRegion) <- c("Region", "Nombre total de pays intÃ©rogÃ©s") ## 
 plot(NbPaysParRegion)
 hist(NbPaysParRegion)
 str(NbPaysParRegion)
-
-## ##
-plot(happy$Region)
-
 
 ## Stat descriptive et sa matrice de rÃ©sultats ##
 res = matrix(NA,7,7)
@@ -51,34 +50,23 @@ row.names(res) <- c("Happiness score", "Log (GDP Per Capital)", "Social support"
 colnames(res) <- c("Minimum","1er quartile","Mediane","Moyenne","3Ã¨me quartile","Maximum","Ecart-type")
 res <- as.data.frame(res)
 
-library(reshape)
-library(ggplot2)
+  ## Partie analyse descirptive quantitative :  Correlation ##
+## Graphique de la corelation entre Log (GDP Per Capital) et VS Healthy life expectancy ##
 
-library(heatmaply)
+plot(happy$`Log (GDP Per Capital)`, happy$`Healthy life expectancy`)
 
-## A voir ##
+## Graphique de la corelation entre Happiness score VS Log (GDP Per Capital) ##
+plot(happy$`Happiness score`,happy$`Log (GDP Per Capital)`)
 
-correlation
+plot(happy$`Happiness score`,happy$`Healthy life expectancy`)
 
 
-boxplot(list(`Social support`,`Healthy life expectancy`, Generosity, `Happiness score`),names=c("Ech. riche","Ech. pauvre"))
-str(happy)
-table(happy$Region)
-levels(happy$Region)
-
-data_mod <- melt(happy, id.vars = c("Central and Eastern Europe","Commonwealth of Independent States","East Asia","Latin America and Caribbean","Middle East and North Africa","North America and ANZ","South Asia","Southeast Asia","Sub-Saharan Africa","Western Europe"), 
-                 measure.vars = c("Happiness score", "Log (GDP Per Capital)", "Social support", "Healthy life expectancy", "Freedom to make life choices", "Generosity", "Perceptions of corruption"))
-p <- ggplot(data_mod) + geom_boxplot(aes(x=Region, y=value, color=variable))
-print(p)
-
-## Correlation ##
-
-cor(happy$`Happiness score`, happy$`Log (GDP Per Capital)`)
+library(corrplot)
 
 correlation <- happy2[,-c(1,2)]
 mcor <- cor(correlation)
 
-library(corrplot)
+
 
 corrplot(mcor, method = "number", type="upper")
 
@@ -88,15 +76,8 @@ corrplot(mcor, method="color", col=col(200),
          type="upper",
          addCoef.col = "black", order="hclust", tl.srt = 30, diag = F)
 
-## LOG VS HEALTHY  1 ##
 
-plot(happy$`Log (GDP Per Capital)`, happy$`Healthy life expectancy`)
-
-## Hppy VS Log ##
-plot(happy$`Happiness score`,happy$`Log (GDP Per Capital)`)
-
-plot(happy$`Happiness score`,happy$`Healthy life expectancy`)
-
+## Fonction de calcul de la significativité de nos corrélations##
 cor.mtest <- function(mat, ...) {
   mat <- as.matrix(mat)
   n <- ncol(mat)
@@ -126,12 +107,10 @@ corrplot(mcor, method="color", col=col(200),
          diag=FALSE 
 )
 
-help("corrplot")
 
 str(correlation)
-
+  ## ## 
 ## Shapiro test ##
-str(a)
 shapiro.test(happy$`Happiness score`) ## W = 0.98899, p-value = 0.2742 -> Suit une loi normale
 shapiro.test(happy$`Log (GDP Per Capital)`) ## W = 0.9624, p-value = 0.000352
 shapiro.test(happy$`Social support`) ## W = 0.90486, p-value = 1.958e-08 -> Ne suit pas une loi normale
@@ -142,11 +121,12 @@ shapiro.test(happy$`Perceptions of corruption`) ## W = 0.82274, p-value = 2.478e
 
 ## https://sites.google.com/site/rgraphiques/4--stat/comparaison-de-moyennes-avec-r?authuser=0#h.p_BXUmufSaTb0p
 
+
+## Vérification graphique de la normalité de nos données ## 
 hist(happy$`Social support`)
 hist(happy$`Happiness score`)
 hist(happy$Generosity)
 
-boxplot(list(`Social support`,`Healthy life expectancy`, Generosity, `Happiness score`),names=c("Ech. riche","Ech. pauvre"))
 par(mfrow=c(1,1))
 plot.ecdf(happy$`Social support`)
 plot.ecdf(rnorm(1000,mean=mean(happy$`Social support`),sd=sqrt(var(happy$`Social support`))),add=T,lty="dotted",pch=" ")
@@ -171,7 +151,7 @@ plot.ecdf(`Healthy life expectancy`)
 plot.ecdf(rnorm(1000,mean=mean(`Healthy life expectancy`),sd=sqrt(var(`Healthy life expectancy`))),add=T,lty="dotted",pch=" ")
 
 
-## Normalisation##
+## Solution envisagée par rapport a la non normalité des données : Normalisation des doonées ##
 
 c1 <- colSums(correlation)
 normalisation <- scale(correlation, center = T, scale = c1)
@@ -215,7 +195,8 @@ par(mfrow=c(1,1))
 plot.ecdf(normalisation$`Perceptions of corruption`)
 plot.ecdf(rnorm(1000,mean=mean(normalisation$`Perceptions of corruption`),sd=sqrt(var(normalisation$`Perceptions of corruption`))),add=T,lty="dotted",pch=" ")
 
-table(Region)
+
+## Analyse effectuée : croisement du score de bonheur et de la région séparés en deux échantillons (Europe VS Reste du monde)##
 
 boxplot(list(happy.Europe$`Happiness score`, happy.ResteDuMonde$`Happiness score`), names = c("Europe", "Reste du monde"), main="Score de bonheur")
 
@@ -224,23 +205,24 @@ attach(happy.Europe)
 happy.ResteDuMonde <- happy[which(Region!="Central and Eastern Europe"),]
 attach(happy.ResteDuMonde)
 
-
-par(mfrow=c(1,1))
-plot.ecdf(happy.Europe$`Happiness score`)
-plot.ecdf(rnorm(1000,mean=mean(happy.Europe$`Happiness score`),sd=sqrt(var(happy.Europe$`Happiness score`))),add=T,lty="dotted",pch=" ")
+## Se qu'on conserve ##
 shapiro.test(happy.Europe$`Happiness score`)
 shapiro.test(happy.ResteDuMonde$`Happiness score`)
+
+## Vérification sur quelques variables ##
 shapiro.test(happy.Europe$`Log (GDP Per Capital)`)
 shapiro.test(happy.Europe$`Social support`)
 shapiro.test(happy.Europe$Generosity)
 
+
+## Analyse descriptive des deux échantillons ## 
 mean(happy.Europe$`Happiness score`)
 sd(happy.Europe$`Happiness score`)
 mean(happy.ResteDuMonde$`Happiness score`)
 sd(happy.ResteDuMonde$`Happiness score`)
 var.test(happy.Europe$`Happiness score`, happy.ResteDuMonde$`Happiness score`)
 
-## H0 : les moyennes sont égales H1 : les moyennes sont différentes
+## H0 : les moyennes des deux échantillons sont égales H1 : les moyennes sont différentes entre eux. 
 t.test(happy.Europe$`Happiness score`, happy.ResteDuMonde$`Happiness score`, var.equal = F)
 t.test(happy.Europe$`Happiness score`, happy.ResteDuMonde$`Happiness score`, var.equal = F, alternative ="greater")
 
