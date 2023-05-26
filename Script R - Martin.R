@@ -109,8 +109,9 @@ corrplot(mcor, method="color", col=col(200),
 
 
 str(correlation)
-  ## ## 
-## Shapiro test ##
+
+  ## Statistique inférentielle ## 
+## Shapiro test pour tester la normalité ##
 shapiro.test(happy$`Happiness score`) ## W = 0.98899, p-value = 0.2742 -> Suit une loi normale
 shapiro.test(happy$`Log (GDP Per Capital)`) ## W = 0.9624, p-value = 0.000352
 shapiro.test(happy$`Social support`) ## W = 0.90486, p-value = 1.958e-08 -> Ne suit pas une loi normale
